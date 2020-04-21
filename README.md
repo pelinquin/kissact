@@ -10,25 +10,25 @@ Dans ce context, même sans expérience précédente, s'aider d'un outil numéri
 
 KISSACT est à ce jour (21 Avril) un simple programme Python de moins de 100 lignes.
 Il est la référence pour des implémentations
-- d'une app pour smartphone (iOs et Android) de contacts BLE 
-- d'un serveur web (backend épidémiologiste)
+- d'une **app** pour smartphone (iOs et Android) de contacts BLE,
+- d'un **serveur** web (backend sous responsabilité des épidémiologistes).
 
-L'approche suivie de stratégie de dépistage individualisé est un processus d'optimisation sous contrainte, stochastique, multi-factoriel et non linéaire. La configuration du modèle est défini par les scientifiques, avec le consensus le plus large possible et en toute transparence avec les citoyens. Ce modèle est téléchargé et mis à jour quotidiennement sur les smartphones ayant installé l'app. 
+L'approche suivie de stratégie de dépistage individualisé est un processus d'optimisation sous contrainte, stochastique, multi-factoriel et non linéaire. La configuration du modèle est toujours définie par les scientifiques et non par les développeurs de l'app. Un consensus le plus large possible doit être obtenu et ce en toute transparence avec les citoyens. Ce modèle est téléchargé et mis à jour quotidiennement sur les smartphones ayant installé l'app. Ainsi, localement l'application des données personnelles au modèle fournit une liste de consignes individualisée à observer par le propriétaire du smartphone. 
 
-Les politiques et les juristes ne devraient pas imposer autoritairement des solutions archaiques et sous-optimales. Si tel était le cas, il sera possible en sortie de crise de démontrer que les dirigeants avaient du sang sur le mains, et ne méritent pas d'être les représentants des peuples, qui aspirent à la paix.
+Si les politiques et les juristes venaient à imposer autoritairement des solutions scientifiquement arbitraire, archaiques et sous-optimales, ils deviendraient responsables face aux peuples, qui aspire à la paix, de nombreux décès d'innocents, par incompétence ou négligeance à vouloir individualiser les mesures.
 
-Sachant que l'efficacité d'une app de contact tracing est fonction quadratique de son taux d'utilisation, il ne faut pas laisser une quelconque liberté aux citoyens à ne pas utiliser cette app en période avérée de pandémie. Il n'y a aucun consentement à demander car la situation est analogue à une vaccination. Le refus de se faire vacciner, tout comme celui d'activer cette app lors des déplacements est un danger collectif de santé public. 
-Il est important de laisser une concurrence saine entre projets de développement de solutions numérique, mais lors de la mise en oeuvre, il est essentiel de tous choisir le même système, avec les apps compatibles entre elles.
+Sachant que l'efficacité d'une app de contact tracing est fonction quadratique de son taux d'utilisation, il est logique de ne pas laisser une quelconque liberté aux citoyens à ne pas utiliser cette app en période avérée de pandémie. Il n'y a aucun consentement à demander car la situation est analogue à une vaccination. Le refus de se faire vacciner, tout comme celui d'activer cette app lors des déplacements relève alors d'un danger collectif de santé public. 
+Par ailleur, il est important de laisser une concurrence saine entre projets de développement de solutions numériques, mais lors de la mise en oeuvre, il sera essentiel pour le bien de tous, de choisir le même système, avec au mmoins des apps compatibles entre elles.
 
-Aujourd'hui (21 Avril 2020), le projet DP-3T est le plus prometeur et le plus avancé. Le projet ROBERT ne présente que de la documentation de protocole et souffre d'une approche plus centralisée que DP-3T.
-Notre objectif avec KISSACT n'est pas de remplacer ces projets financés, universitaires, soutenus par les puissances publiques, mais de obliger à prendre en compte des exigences citoyennes et scientifiques qu'ils auraient omis de satisfaire.
+Aujourd'hui (21 Avril 2020), le projet DP-3T est le plus prometeur, le plus diffusé et le plus avancé. Le projet ROBERT ne présente que de la documentation de protocole et souffre d'une approche plus centralisée que DP-3T.
+Notre objectif avec KISSACT n'est pas de remplacer ces projets financés, d'universitaires compétents, soutenus par les puissances publiques, mais d'obliger à prendre en compte des exigences citoyennes et scientifiques qui pourraient être oubliées. Notre totale indépendance, comme start-up ne touchant aucun revenu, est le meilleur garant que l'intéret citoyen soit bien défendu.
 
-KISSACT veut améliorer la transparence et la compréhension des protocoles de Contact Tracing. C'est un peu le 'Contact Tracinng pour les nulls' !
-J'invite tous les currieux, même les jeunes, sans être obligatoirement informaticien, à se plonger dans le code Python de moins de 100 lignes, à exécuter l'exemple fourni avec quatre utilisateurs virtuels: Alice, Bob, Carole et David.
+KISSACT veut simplement améliorer la transparence et la compréhension des protocoles de Contact Tracing. C'est un peu un 'Contact Tracinng pour les nulls' !
+J'invite tous les currieux, même les jeunes, sans être obligatoirement informaticien, à se plonger dans le code Python de moins de 100 lignes, à exécuter l'exemple fourni avec les quatre utilisateurs virtuels: Alice, Bob, Carol et David.
 
 ## Examinons ce code ensemble
 
-Ce code simule tous: les utilisateurs, les serveurs, le temps. C'est un modèle donc c'est incomplet, c'est généralement faux, c'est réducteur, mais c'est utile pour programmer des app et des serveurs bien conçus, robustes, maintanable et efficasses.
+Ce code simule tous: les utilisateurs, les serveurs, le temps. C'est un modèle donc par définition incomplet, généralement faux, réducteur, mais un modèle est quand même utile pour programmer correctement des app et des serveurs, robustes, maintanable, efficasses et respectants les principes d'optimalité d'ingenierie.
 
 Pour déclarer un utilisateur, on crée un objet appCT () avec le nom et l'age de son propriétaire, ce qui peut sembler violer les principes de protection des données privées. Le nom facilite la compréhension des résultats de simulation et l'age est un exemple de données particulières, comme les positions géographiques des déplacements, qui ne sont pas utiles dans la détermination du risque brut de contagion au virus, mais qui peuvent être exploité par les modèle épidémiologiques implantés coté serveur pour déterminer la meilleure mesure individualisée à prendre quotidiennement.
 
