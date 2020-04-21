@@ -28,6 +28,12 @@ Our objective with KISSACT is not to replace these projects financed and support
 KISSACT would simply like to improve the transparency and understanding of Contact Tracing protocols. 
 I invite all curious people, even young people, to dive into the 100-line Python code and run the example provided with the four virtual users: Alice, Bob, Carol and David.
 
+## Centralization ##
+
+I see two main problems with projects that focus on greater responsibility for a central server.
+- Random numbers used as a root to create keys, but also asymmetric key sets for other applications, cannot be produced on the server side because the simple definition of signature or authentication prohibits any other entity from signing in place of the citizen. It is almost impossible to prove that this is not possible if it is the server that generates these keys.
+- The risk score has to be generated locally over the phone because to take relevant individualized measures, personal data such as age, geographical location or medical history must be used. These data are not known to the server.
+
 ## Stroll through the code ## 
 
 This code simulates everything: the users, the epidemiological models, the server, the time. Like any model, it is incomplete, reductive, but useful to program an app and a server respecting the principles of optimality engineering.
