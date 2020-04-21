@@ -2,23 +2,25 @@
 
 ## Introduction
 
-KISSACT est une contribution aux projets d'app pour smartphones (+objets connectés) et de serveur (HTTP) d'autorité sanitaire pour permettre un traitement automatique et **individualisé** des mesures de prévension contre une pandémie, comme celle du Covid-19.
+KISSACT is a contribution to the projects of apps for smartphones (+connected objects) and server (HTTP) of health authorities to allow an automatic and **individualized** processing of preventive measures against a pandemic, like the one of Covid-19.
 
-Le coût économique mondial de meusures de confinement indifférencié est gigantesque, plusieurs dizaines de milliers de milliards de dollars. Par ailleurs, le déconfinement indifférencié, risquant de laisser repartir la pandémie, conduit à terme à des coûts tout aussi importants. Au final, c'est la prospérité de pays entiers, la liberté des peuples et la santé des humains qui sont menacées. L'investissement dans un coût de développement d'une app de contact tracing est ridiculement faible vu l'enjeu économique. Notre contribution est toutefois bénévole. Ma demande d'aide auprès du ministère Français des armées pour un montant de 5000€ a été refusée.
+The global economic cost of undifferentiated containment measures is gigantic: tens of thousands of billions of dollars. Moreover, undifferentiated deconfinement, which could allow the pandemic to restart, leads to equally high costs in the long run. In the end, the prosperity of entire countries, the freedom of peoples and human health are threatened. For the public authorities, the investment in the development of a **contact tracing** system is ridiculously low given the economic stakes. However, my contribution is voluntary.
 
-Dans ce context, même sans expérience précédente, s'aider d'un outil numérique est nécessaire pour automatiser et améliorer la pertinence des opérations classiques et manuelle de 'contact tracing' conduites par des épidémiologistes via des intrerviews.
+In this context, even without previous experience, the use of a digital tool is necessary to automate and improve the relevance of classic and manual 'contact tracing' operations conducted by epidemiologists via interviews.
 
-KISSACT est à ce jour (21 Avril) un simple programme Python de moins de 100 lignes.
-Il est la référence pour des implémentations
-- d'une **app** pour smartphone (iOs et Android) de contacts BLE,
-- d'un **serveur** web (backend sous responsabilité des épidémiologistes).
+KISSACT is to date (April 21, 2020) a simple 100-line Python program.
+It is the reference for implementations for:
+- an **app** for smartphone (iOs and Android) with BLE contacts,
+- a web **server**  (backend under the responsibility of epidemiologists).
 
-L'approche suivie de stratégie de dépistage individualisé est un processus d'optimisation sous contrainte, stochastique, multi-factoriel et non linéaire. La configuration du modèle est toujours définie par les scientifiques et non par les développeurs de l'app. Un consensus le plus large possible doit être obtenu et ce en toute transparence avec les citoyens. Ce modèle est téléchargé et mis à jour quotidiennement sur les smartphones ayant installé l'app. Ainsi, localement l'application des données personnelles au modèle fournit une liste de consignes individualisée à observer par le propriétaire du smartphone. 
+The KISSACT app incorporates a contagion model as a result of past contacts of equipped persons. Epidemiologists are responsible for the daily parameterization of this model, which may differ from region to region. 
+The app provides a list of individualized, daily instructions to be observed by the smartphone owner via the relay of the server, without revealing the identity of the persons. 
 
-Si les politiques et les juristes venaient à imposer autoritairement des solutions scientifiquement arbitraire, archaiques et sous-optimales, ils deviendraient responsables face aux peuples, qui aspire à la paix, de nombreux décès d'innocents, par incompétence ou négligeance à vouloir individualiser les mesures.
+Knowing that the efficiency of a contact tracing app is a quadratic function of its usage rate, the wearing of the app in times of pandemic should not be left to the choice of citizens. The situation is analogous to a vaccination. Refusal to be vaccinated, as well as the refusal to activate this device when travelling, poses a collective danger to public health.
 
-Sachant que l'efficacité d'une app de contact tracing est fonction quadratique de son taux d'utilisation, il est logique de ne pas laisser une quelconque liberté aux citoyens à ne pas utiliser cette app en période avérée de pandémie. Il n'y a aucun consentement à demander car la situation est analogue à une vaccination. Le refus de se faire vacciner, tout comme celui d'activer cette app lors des déplacements relève alors d'un danger collectif de santé public. 
-Par ailleur, il est important de laisser une concurrence saine entre projets de développement de solutions numériques, mais lors de la mise en oeuvre, il sera essentiel pour le bien de tous, de choisir le même système, avec au mmoins des apps compatibles entre elles.
+On the other hand, there may be competition between projects for the development of digital contact tracing solutions, but when it comes to actual implementation, it will be essential that all choose the same system, with at least apps that are compatible with each other.
+
+____
 
 Aujourd'hui (21 Avril 2020), le projet DP-3T est le plus prometeur, le plus diffusé et le plus avancé. Le projet ROBERT ne présente que de la documentation de protocole et souffre d'une approche plus centralisée que DP-3T.
 Notre objectif avec KISSACT n'est pas de remplacer ces projets financés, d'universitaires compétents, soutenus par les puissances publiques, mais d'obliger à prendre en compte des exigences citoyennes et scientifiques qui pourraient être oubliées. Notre totale indépendance, comme start-up ne touchant aucun revenu, est le meilleur garant que l'intéret citoyen soit bien défendu.
