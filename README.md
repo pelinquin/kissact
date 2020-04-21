@@ -13,6 +13,8 @@ It is the reference for implementations for:
 - an **app** for smartphone (iOs and Android) with BLE contacts,
 - a web **server**  (backend under the responsibility of epidemiologists).
 
+Note that the app can work on the move without a SIM card. You need a wired or Wifi connection to synchronize with the server in the evening, for example.
+
 The KISSACT app incorporates a contagion model as a result of past contacts of equipped persons. Epidemiologists are responsible for the daily parameterization of this model, which may differ from region to region. 
 The app provides a list of individualized, daily instructions to be observed by the smartphone owner via the relay of the server, without revealing the identity of the persons. 
 
@@ -20,75 +22,62 @@ Knowing that the efficiency of a contact tracing app is a quadratic function of 
 
 On the other hand, there may be competition between projects for the development of digital contact tracing solutions, but when it comes to actual implementation, it will be essential that all choose the same system, with at least apps that are compatible with each other.
 
-____
+Today (April 21, 2020), the DP-3T project is the most advanced and the most widespread. The ROBERT project presents only protocol documentation and suffers from a more centralized approach.
+Our objective with KISSACT is not to replace these projects financed and supported by public authorities, but to force to take into account some citizen or scientific requirements that might have been forgotten.
 
-Aujourd'hui (21 Avril 2020), le projet DP-3T est le plus prometeur, le plus diffusé et le plus avancé. Le projet ROBERT ne présente que de la documentation de protocole et souffre d'une approche plus centralisée que DP-3T.
-Notre objectif avec KISSACT n'est pas de remplacer ces projets financés, d'universitaires compétents, soutenus par les puissances publiques, mais d'obliger à prendre en compte des exigences citoyennes et scientifiques qui pourraient être oubliées. Notre totale indépendance, comme start-up ne touchant aucun revenu, est le meilleur garant que l'intéret citoyen soit bien défendu.
+KISSACT would simply like to improve the transparency and understanding of Contact Tracing protocols. 
+I invite all curious people, even young people, to dive into the 100-line Python code and run the example provided with the four virtual users: Alice, Bob, Carol and David.
 
-KISSACT veut simplement améliorer la transparence et la compréhension des protocoles de Contact Tracing. C'est un peu un 'Contact Tracinng pour les nulls' !
-J'invite tous les currieux, même les jeunes, sans être obligatoirement informaticien, à se plonger dans le code Python de moins de 100 lignes, à exécuter l'exemple fourni avec les quatre utilisateurs virtuels: Alice, Bob, Carol et David.
+## Stroll through the code ## 
 
-## Examinons ce code ensemble
+This code simulates everything: the users, the epidemiological models, the server, the time. Like any model, it is incomplete, reductive, but useful to program an app and a server respecting the principles of optimality engineering.
 
-Ce code simule tous: les utilisateurs, les serveurs, le temps. C'est un modèle donc par définition incomplet, généralement faux, réducteur, mais un modèle est quand même utile pour programmer correctement des app et des serveurs, robustes, maintanable, efficasses et respectants les principes d'optimalité d'ingenierie.
+A user is created by a *ctApp* object with a nickname and the age of its owner. 
+This data, as well as the geographical positions of the movements remain in the memory of the phone and are never transmitted outside, neither to the server, nor to the manufacturers of smartphones, nor to the governments.
 
-Pour déclarer un utilisateur, on crée un objet *ctApp* () avec le pseudo et l'age de son propriétaire, ce qui peut sembler violer les principes de protection des données privées. Le nom n'est sert qu'à distinguer les objets et faciliter la compréhension des résultats de simulation. L'age est un exemple de donnée personnelle, comme les positions géographiques des déplacements, qui peuvent être utilisées par le modèle de risque téléchargé sur le téléphone pour déterminer la meilleure mesure individualisée à prendre quotidiennement. En aucun cas ces données sont transmises au serveur. 
+A *serverCT* server object is created, under the responsibility of the health authorities. This server, which can be described as public, does not contain anything secret about people or the operation of the apps. It is simply protected from any malicious person who would want to modify or delete this data shared between all. 
 
-Un objet serveur 'serverCT' est créé, sous la responsabilité des autorités sanitaires. Ce serveur que l'on peut qualifié de public, ne contient rien de secret sur les personnes ou sur le fonctionnement des app. Il est simplement protégé de toute personne malveillante qui voudrait modifier ou effacer ces données partagées entre tous. 
+There are no time constants in the KISSACT code. The 'next' method, which simulates the environment, changes the BLE ID for all users. Real apps only change their Id as a function of time.
 
-Dans le code KISSACT, Il n'y a aucune constante de temps. C'est volontaire. Tout le modèle est configurable par les épidémiologistes, et des paramètres peuvent changer quotidiennement dans certaines limites contrôlées par l'app. Il n'est pas possible pour quelqu'un qui predrait le contrôle du serveur, de reprogrammer complètement les apps.
-En particulier, il n'y a pas de découpage par jour comme dans DP-3T. La notion de jour n'a pas de sens pour le virus, c'est juste un repère statistique. De même, la période de référence, nommée EPOCH dans DP-3T, peut être variable.
-Dans KISSACT, la méthode 'next' qui simule l'environnement est ici associée au serveur, procède à un changement d'indentifiant BLE (Id par la suite) pour tous les utilisateurs. Les vraie app changent seule d'Id en fonction du temps.
+The 'contact' function simulates a contact between two people by specifying the duration of this contact, the proximity (inverse of the distance) of this contact. The contacts are recorded symmetrically as in real life.
 
-La fonnction 'contact' simule un contact entre deux personnes en précisant la durée de ce contact, la proximité (inverse de la distance) de ce contact. Dans l'application réelle, on peut introduire diverse options qui vont légèrement modifier l'évaluation du risque de contagion.
-Une option "plexiglass" pour indiquer un mur leger afin de tenir compte de mesure de protection physiques entre persones. On peut aussi prévoir une option qui indique si tout l'entourage porte un masque, partiellement ou pas de tout.
+A malicious person can spy on messages sent from a large distance using a directional antenna, without sending a message.
+They can also send a large number of messages (DOS attack) to saturate nearby smartphones.
+The common Apple-Google API should make it easier to protect against these attacks.
 
-Les contacts s'enregistrent de manière symétrique comme dans la vie réelle. 
-Une personne malveillante peut espioner les message émis avec une importante distance en utilisant une antenne directionnelle, sans emmetre de message.
-Elle peut aussi envoyer de très nombreux messages (attaque DOS) pour saturer les smartphones à proximité.
-Ce sont les couches basses qui filtrent ces attaques. L'API commune Apple-Google devrait faciliter le travail.
+In the beginning, the four people stay separated.
+Then Alice meets Bob, then Bob has lunch with Carol.
+Some time later he walks with her in the park.
+Finally David visits Alice.
 
-Le scénario est le suivant:
-Au debut, les quatres personnes restent séparées
-Ensuite Alice rencontre Bob, 
-puis Bob déjeune avec Carol,
-Quelque temps plus tard, il se promène avec elle dans le parc
-Enfin, David rend visite à Alice.
+Suppose Carol develops symptoms at Covid-19. Her doctor gives her a right to be tested and it turns out she is positive. Her doctor asks the server to generate a disposable code, which will be used by Carol to declare that she is contagious. This code prevents anyone, including the robot, from declaring herself contagious.
 
-Imaginons que Carol développe des symptômes au Covid-19. Son médecin lui procure un droit à être testé et il s'avère qu'elle est positive. Son médecin fait générer par le serveur un code à usage unique, qui servira à Carole à déclarer qu'elle est contagieuse. La saisie de code évite que n'importe qui, robot compris se séclare contagieux.
+Carole is free to inform the server of past contacts. Depending on the place or the period, she may decide to hide some contacts to transmit.
+In our example, David is also sick and decides that instead of providing a list, he prefers to give his root key, which will allow the server to reconstruct his entire contact history.
+The server will publicly share the contact history of infected people, without any geolocation data, without knowing the identity or even the number of infected people.
 
-Carole est libre d'informer le serveur des contacts passés avec le degré de détail qu'elle désire. Plus elle donne d'information, et meilleures sera l'analyse de risque qui en sera déduite. 
-L'app lui représente sa liste de contacts et elle peut choisir de ne pas diffuser certains, à certaines date ou en fonction du lieu enregistré du contact (si GPS/GSM activé).
+After updating the new server data, the app is able to propose a set of individual measures to be taken. However, there is no mechanism to verify the effective application of the recommended measures.
+If with this and other tools, Rt durably drops below 1 or if a vaccine is found, then there will be fewer and fewer Convid-plus declarations on the server. The risk for everyone will tend towards zero. The app will no longer be useful.
 
-Dans notr exemple, David est aussi malade et décide que plutôt que de fournir une liste, il donne simplement sa clé racine, ce qui permettra au serveur de reconstituer tout son historique de contact.
+On the app interface, I recommend to display a "bubble" indicator (see https://adox.io/bulle.pdf) that tells the bearer if he respects the distancing rules or not.
 
-Le serveur va partager publiquement l'historique des contacts des personnes infectées, sans aucune autre données de géolocalisation, sans connaitre l'identité ni le nombre de personnes infectées.
-
-Tous les jours, en utilisant une connexion filaire ou wifi pour les téléphones sans carte SIM, l'app intéroge le serveur pour avoir la mise à jour des contacts des personnes infectées et la mise à jour du modèle d'épidémiologie.
-Après application de ce modèle, l'app est capable de proposer un ensemble de mesures individuelle à prendre.
-
-Il n'y a en revanche aucun mécanisme pour vérifier ensuite l'application des mesures recommandées.
-
-Si avec cet outils et d'autres, Rt passe durablement en dessous de 1 ou si un vaccin est trouvé, alors il y aura de moins en moins de déclarations Convid-plus sur le serveur.
-Comme le risque de contagion est fonction des dates des rencontres passées, le risque va tendre vers zéro. L'app ne sera plus utile.
-
-Au niveau de l'interface de l'app, je recommande d'afficher un indicateur "bulle" (voir https://adox.io/bulle.pdf) qui indique au porteur s'il respecte ou pas les règles de distanciation.
 
 ## Extensions
 
-Il sera possible à terme lors d'un contact BLE d'effectuer un (micro)paiement numérique instantané, dans le cadre d'un système de crédit mutuel. Contraireemnt à une monnaie, ce système autorise à avoir un compte avec un solde négatif, jusqu'à une certaine limite.
-L'app affiche le solde courant de l'utilisateur.
-Le paiement ne doit être possible qu'en zone bulle Orange, pour obliger les contractant à s'éloigner l'un de l'autre.
-De plus, une personne ne peut payer qu'au moments où son smartphone ne scane qu'un seul samrtphone à proximité. Le destinaitaire est ainsi identifié et la transaction validée par le contact. Les clés sont échangées et un octet de l'identifiant est utilisé pour renseigner le prix (maximum 256 unité). 
+Why does the *ctApp* object have a *balance* attribute?
+It will eventually be possible, with a small cryptographic layer and during a BLE contact, to make an instantaneous digital (micro)payment, within the framework of a mutual credit system. Unlike a currency, this system allows you to have an account with a negative balance, up to a certain limit.
 
-Cette extension demande une déclaration auprès d'un service d'état civil afin de pouvoir discriminer les humains entre eux et n'autoriser qu'un seul compte par personne, comme le LivretA. Une telle autorisation d'endettement, une avance de ligne de crédit, sans intéret, à vie, n'est pas possible pour les personnes morales, les robots ou les IA.
+Payment is not possible in the 'red' zone, or if there are more than two people in the vicinity.
+The destination of the payment is thus identified and the transaction validated by the contact. The keys are exchanged and one byte of the identifier is used to fill in the price (maximum 256 units). 
+The app displays the user's current balance.
 
-L'unité monétaire est universelle. Elle est initialisée avec une valeur approximative de l'énergie d'1kW, soit environ 10 centimes d'euros. Le prix de chaque produit échangeable par ce système comptable est libre et maximum d'environ 25€.
+This extension requires a declaration to a civil registry office in order to be able to discriminate between humans and authorise only one account per person, like the French LivretA. Such an interest-free, lifetime credit line advance is not possible for legal entities, robots or AI.
 
-Parallèlement à cette fonction de paiement et sans utiliser l'app, il est possible d'instaurer une forme dégradée de crédit mutuel avec l'euro en forçant les banques privées à autoriser un découvert gratuit, à vie, pour tout citoyen adulte. 
-La limite du découvert, décidée démocratiquement, peut être initialement de 10.000€ et être augmentée par la suite pour ateindre par exemple 120.000€ à l'horizon 20230 (conseils de l'économiste Thomas PiKetti).
+The monetary unit is universal. It is initialized with an approximate energy value of 1kW, or about 10 euro cents. The price of each product exchangeable through this accounting system is free and maximum of about 25€.
 
-Le paiement pourra aussi se réaliser via l'usage d'un objet partagé comme un distributeur, un compteur ou un transporteur de ressources. C'est pour cette raison qu'il doit être possible d'implémenter le protocole KISSACT sur un appareil BLE autre qu'un smartphone. Plusieurs projets sont à l'étude, à base d'ESP32, de nRF52 ou avec une carte RaspberryPi-zéro équipée d'une batterie (hat). 
+Payment can also be made through the use of a shared object such as a distributor, a counter or a resource carrier. For this reason it must be possible to implement the KISSACT protocol on a BLE device other than a smartphone. Several projects are under study, based on ESP32, nRF52 or with a RaspberryPi-zero card equipped with a battery (hat). 
+
+____
 
 ## Contact
 
