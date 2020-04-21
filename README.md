@@ -70,22 +70,23 @@ Il n'y a en revanche aucun mécanisme pour vérifier ensuite l'application des m
 Si avec cet outils et d'autres, Rt passe durablement en dessous de 1 ou si un vaccin est trouvé, alors il y aura de moins en moins de déclarations Convid-plus sur le serveur.
 Comme le risque de contagion est fonction des dates des rencontres passées, le risque va tendre vers zéro. L'app ne sera plus utile.
 
-AU niveau de l'interface de l'app, je recommande d'afficher un indicateur "bulle" (voir https://adox.io/bulle.pdf) qui indique au porteur s'il respecte ou pas les règles de distanciation.
+Au niveau de l'interface de l'app, je recommande d'afficher un indicateur "bulle" (voir https://adox.io/bulle.pdf) qui indique au porteur s'il respecte ou pas les règles de distanciation.
 
 ## Extensions
 
-Il est possible lors d'un contact d'effectuer un paiement numérique instantané, dans le cadre d'un système de crédit mutuel. Contraireemnt à une monnaie, il est autorisé d'avoir un compte avec un solde négatif, jusqu'à une certaine limite. La valeur positive est aussi limitée.
-L'app affiche le solde courant.
-Le paiement ne doit être possible qu'en zone Orange, pour obliger les contractant à s'éloigner l'un de l'autre.
+Il sera possible à terme lors d'un contact BLE d'effectuer un (micro)paiement numérique instantané, dans le cadre d'un système de crédit mutuel. Contraireemnt à une monnaie, ce système autorise à avoir un compte avec un solde négatif, jusqu'à une certaine limite.
+L'app affiche le solde courant de l'utilisateur.
+Le paiement ne doit être possible qu'en zone bulle Orange, pour obliger les contractant à s'éloigner l'un de l'autre.
+De plus, une personne ne peut payer qu'au moments où son smartphone ne scane qu'un seul samrtphone à proximité. Le destinaitaire est ainsi identifié et la transaction validée par le contact. Les clés sont échangées et un octet de l'identifiant est utilisé pour renseigner le prix (maximum 256 unité). 
 
-Cette extension demande une déclaration auprès d'un service d'état civil afin de pouvoir discriminer les humains entre eux et n'autoriser qu'un seul compte par personne, comme le LivertA. Une telle autorisation d'andettement, une avance de ligne de crédit, sans intéret, à vie, n'est pas possible pour les personnes morales, les robots ou les IA.
+Cette extension demande une déclaration auprès d'un service d'état civil afin de pouvoir discriminer les humains entre eux et n'autoriser qu'un seul compte par personne, comme le LivretA. Une telle autorisation d'endettement, une avance de ligne de crédit, sans intéret, à vie, n'est pas possible pour les personnes morales, les robots ou les IA.
 
-L'unité monétaire est universelle. Elle est initialisée avec une valeur approximative de l'énergie d'1kW, soit environ 10 centimes d'euros. Le prix de chaque produit échangeable par ce système comptable est libre.
+L'unité monétaire est universelle. Elle est initialisée avec une valeur approximative de l'énergie d'1kW, soit environ 10 centimes d'euros. Le prix de chaque produit échangeable par ce système comptable est libre et maximum d'environ 25€.
 
-Parallèlement à cette fonction de paiement, il est possible d'instaurer une forme dégradée de crédit mutuel avec l'auro en forçant les banques privées à autoriser un découvert gratuit, à vie, pour tout citoyen adulte. 
+Parallèlement à cette fonction de paiement et sans utiliser l'app, il est possible d'instaurer une forme dégradée de crédit mutuel avec l'euro en forçant les banques privées à autoriser un découvert gratuit, à vie, pour tout citoyen adulte. 
 La limite du découvert, décidée démocratiquement, peut être initialement de 10.000€ et être augmentée par la suite pour ateindre par exemple 120.000€ à l'horizon 20230 (conseils de l'économiste Thomas PiKetti).
 
-Le paiement pourra aussi se réaliser via un objet. C'est pour cette raison qu'il doit être possible d'implémenter un protocole KISSACT sur un appareil BLE autre qu'un smartphone. Plusieurs projets sont à l'étude, à base d'ESP32, de nRF52 ou avec une carte RaspberryPi-zéro équipée d'une batterie (hat). 
+Le paiement pourra aussi se réaliser via l'usage d'un objet partagé comme un distributeur, un compteur ou un transporteur de ressources. C'est pour cette raison qu'il doit être possible d'implémenter le protocole KISSACT sur un appareil BLE autre qu'un smartphone. Plusieurs projets sont à l'étude, à base d'ESP32, de nRF52 ou avec une carte RaspberryPi-zéro équipée d'une batterie (hat). 
 
 ## Contact
 
