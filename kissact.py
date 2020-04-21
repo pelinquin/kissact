@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """ KISSACT  - Keep Stupid Simple Automatic Contact Tracing
  (Less than 100 lines of Python code)
  12 bytes EphIds + 3 bytes Prefix + 1 byte Price: 16bytes BLEid 
