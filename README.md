@@ -22,7 +22,7 @@ Knowing that the efficiency of a contact tracing app is a quadratic function of 
 
 On the other hand, there may be competition between projects for the development of digital contact tracing solutions, but when it comes to actual implementation, it will be essential that all choose the same system, with at least apps that are compatible with each other.
 
-Today (April 21, 2020), the [DP3T](https://github.com/DP-3T) project is the most advanced and the most widespread. The [ROBERT](https://github.com/ROBERT) project presents only protocol documentation and suffers from a more centralized approach.
+Today (April 21, 2020), the [DP3T](https://github.com/DP-3T) project is the most advanced and the most widespread. The [ROBERT](https://github.com/ROBERT-proximity-tracing) project presents only protocol documentation and suffers from a more centralized approach.
 Our objective with KISSACT is not to replace these projects financed and supported by public authorities, but to force to take into account some citizen or scientific requirements that might have been forgotten.
 
 KISSACT would simply like to improve the transparency and understanding of Contact Tracing protocols. 
