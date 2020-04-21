@@ -1,20 +1,21 @@
-# KISSACT
-Keep It Stupid Simple Automatic Contact Tracing
+# KISSACT - Keep It Stupid Simple Automatic Contact Tracing
 
 ## Introduction
 
-KISSACT est une contribution aux projets d'app pour smartphones (+objets connectés) et de serveur (HTTP) sanitaire pour permettre un traitement automatique et individualisé des mesures de prévension contre une pandémie, comme celle du Covid-19.
+KISSACT est une contribution aux projets d'app pour smartphones (+objets connectés) et de serveur (HTTP) d'autorité sanitaire pour permettre un traitement automatique et **individualisé** des mesures de prévension contre une pandémie, comme celle du Covid-19.
 
-Le coût économique mondial de meusures de confinement indifférencié est gigantesque. Par ailleurs, le déconfinement indifférencié, en laissant repartir la pandémie, conduit à terme des coûts tout aussi importants. Au final, c'est la prospérité des pays, la liberté des peuples et la santé des humains qui sont menacées.
+Le coût économique mondial de meusures de confinement indifférencié est gigantesque, plusieurs dizaines de milliers de milliards de dollars. Par ailleurs, le déconfinement indifférencié, risquant de laisser repartir la pandémie, conduit à terme à des coûts tout aussi importants. Au final, c'est la prospérité de pays entiers, la liberté des peuples et la santé des humains qui sont menacées. L'investissement dans un coût de développement d'une app de contact tracing est ridiculement faible vu l'enjeu économique. Notre contribution est toutefois bénévole. Ma demande d'aide auprès du ministère Français des armées pour un montant de 5000€ a été refusée.
 
-Dans ce context, s'aider d'un outil numérique est nécessaire pour automatiser et améliorer la pertinence des opérations classiques et manuelle de 'contact tracing' conduites par des épidémiologistes via des intrerviews.
+Dans ce context, même sans expérience précédente, s'aider d'un outil numérique est nécessaire pour automatiser et améliorer la pertinence des opérations classiques et manuelle de 'contact tracing' conduites par des épidémiologistes via des intrerviews.
 
 KISSACT est à ce jour (21 Avril) un simple programme Python de moins de 100 lignes.
 Il est la référence pour des implémentations
 - d'une app pour smartphone (iOs et Android) de contacts BLE 
 - d'un serveur web (backend épidémiologiste)
 
-L'approche suivie de stratégie de dépistage individualisé est un processus d'optimisation sous contrainte, stochastique, multi-factoriel et non linéaire. La configuration du modèle est défini par les scientifiques, avec le consensus le plus large possible et en toute transparence avec les citoyens. Les politiques et les juristes ne devraient pas imposer autoritairement des solutions archaiques et sous-optimales. Si tel était le cas, il sera possible en sortie de crise de démontrer que les dirigeants avaient du sang sur le mains, et ne méritent pas d'être les représentants des peuples, qui aspirent à la paix.
+L'approche suivie de stratégie de dépistage individualisé est un processus d'optimisation sous contrainte, stochastique, multi-factoriel et non linéaire. La configuration du modèle est défini par les scientifiques, avec le consensus le plus large possible et en toute transparence avec les citoyens. Ce modèle est téléchargé et mis à jour quotidiennement sur les smartphones ayant installé l'app. 
+
+Les politiques et les juristes ne devraient pas imposer autoritairement des solutions archaiques et sous-optimales. Si tel était le cas, il sera possible en sortie de crise de démontrer que les dirigeants avaient du sang sur le mains, et ne méritent pas d'être les représentants des peuples, qui aspirent à la paix.
 
 Sachant que l'efficacité d'une app de contact tracing est fonction quadratique de son taux d'utilisation, il ne faut pas laisser une quelconque liberté aux citoyens à ne pas utiliser cette app en période avérée de pandémie. Il n'y a aucun consentement à demander car la situation est analogue à une vaccination. Le refus de se faire vacciner, tout comme celui d'activer cette app lors des déplacements est un danger collectif de santé public. 
 Il est important de laisser une concurrence saine entre projets de développement de solutions numérique, mais lors de la mise en oeuvre, il est essentiel de tous choisir le même système, avec les apps compatibles entre elles.
@@ -69,9 +70,9 @@ L'unité monétaire est universelle. Elle est initialisée avec une valeur appro
 Parallèlement à cette fonction de paiement, il est possible d'instaurer une forme dégradée de crédit mutuel avec l'auro en forçant les banques privées à autoriser un découvert gratuit, à vie, pour tout citoyen adulte. 
 La limite du découvert, décidée démocratiquement, peut être initialement de 10.000€ et être augmentée par la suite pour ateindre par exemple 120.000€ à l'horizon 20230 (conseils de l'économiste Thomas PiKetti).
 
-Le paiement pourra aussi se réaliser via un objet. C'est pour cette raison qu'il doit être possible d'implémenter un protocole KISSACT sur un appareil BLE autre qu'un smartphone. Plusieurs projets sont à l'étude, à base d'ESP32, de nRf52 ou avec une carte RaspberryPi zéro équipée d'une batterie (hat). 
+Le paiement pourra aussi se réaliser via un objet. C'est pour cette raison qu'il doit être possible d'implémenter un protocole KISSACT sur un appareil BLE autre qu'un smartphone. Plusieurs projets sont à l'étude, à base d'ESP32, de nRF52 ou avec une carte RaspberryPi-zéro équipée d'une batterie (hat). 
 
-## Contacts
+## Contact
 
 laurent.fournier@adox.io
 
