@@ -30,32 +30,47 @@ J'invite tous les currieux, même les jeunes, sans être obligatoirement informa
 
 Ce code simule tous: les utilisateurs, les serveurs, le temps. C'est un modèle donc par définition incomplet, généralement faux, réducteur, mais un modèle est quand même utile pour programmer correctement des app et des serveurs, robustes, maintanable, efficasses et respectants les principes d'optimalité d'ingenierie.
 
-Pour déclarer un utilisateur, on crée un objet appCT () avec le nom et l'age de son propriétaire, ce qui peut sembler violer les principes de protection des données privées. Le nom facilite la compréhension des résultats de simulation et l'age est un exemple de données particulières, comme les positions géographiques des déplacements, qui ne sont pas utiles dans la détermination du risque brut de contagion au virus, mais qui peuvent être exploité par les modèle épidémiologiques implantés coté serveur pour déterminer la meilleure mesure individualisée à prendre quotidiennement.
+Pour déclarer un utilisateur, on crée un objet *ctApp* () avec le pseudo et l'age de son propriétaire, ce qui peut sembler violer les principes de protection des données privées. Le nom n'est sert qu'à distinguer les objets et faciliter la compréhension des résultats de simulation. L'age est un exemple de donnée personnelle, comme les positions géographiques des déplacements, qui peuvent être utilisées par le modèle de risque téléchargé sur le téléphone pour déterminer la meilleure mesure individualisée à prendre quotidiennement. En aucun cas ces données sont transmises au serveur. 
 
-Un objet serveur 'serverCT' est créé, sous la responsabilité des autorités sanitaires. Ce serveur ne contient rien de secret pour faire fonctionner les app. Il est simplement protégé de toute personne malveillante qui voudrait modifier ou effacer des données que ce serveur met à disposition de tous. Il peut contenir un dossier privé pour chaque personne qui le souhaiterait, pour y mettre des informations médicales à destination du corps médical, mais toujours de façon anonyme. 
+Un objet serveur 'serverCT' est créé, sous la responsabilité des autorités sanitaires. Ce serveur que l'on peut qualifié de public, ne contient rien de secret sur les personnes ou sur le fonctionnement des app. Il est simplement protégé de toute personne malveillante qui voudrait modifier ou effacer ces données partagées entre tous. 
 
-Il n'y a aucune constante de temps dircetment dans le code KISSACT. C'est volontaire pour laisser cela configurable par les épidémiologistes. En particulier, il n'y a pas de découpage par jour comme dans DP-3T. La notion de jour n'a pas de sens pour le virus, c'est juste un repère statistique. De même, la période de référence, nommée EPOCH dans DP-3T, peut être variable et correspond, par la méthode 'next', à un changement d'indentifiant BLE (ID par la suite). Cela peut varier entre une minute et une heure.
+Dans le code KISSACT, Il n'y a aucune constante de temps. C'est volontaire. Tout le modèle est configurable par les épidémiologistes, et des paramètres peuvent changer quotidiennement dans certaines limites contrôlées par l'app. Il n'est pas possible pour quelqu'un qui predrait le contrôle du serveur, de reprogrammer complètement les apps.
+En particulier, il n'y a pas de découpage par jour comme dans DP-3T. La notion de jour n'a pas de sens pour le virus, c'est juste un repère statistique. De même, la période de référence, nommée EPOCH dans DP-3T, peut être variable.
+Dans KISSACT, la méthode 'next' qui simule l'environnement est ici associée au serveur, procède à un changement d'indentifiant BLE (Id par la suite) pour tous les utilisateurs. Les vraie app changent seule d'Id en fonction du temps.
 
-La fonnction 'contact' simule un contact entre deux personnes en précisant la durée de ce contact, la proximité (inverse de la distance). Dans l'application réelle, on peut introduire une option "plexiglass" pour indiquer un mur leger afin de tenir compte de mesure de protection physiques entre persones. On peut aussi prévoir une option qui indique si l'entourage est completement masqué, partiellement ou pas de tout.
-Les contacts s'enregistrent de manière symétrique. Alice rencontre Bob, Bob déjeune avec Carole, et David rend visite à Alice.
+La fonnction 'contact' simule un contact entre deux personnes en précisant la durée de ce contact, la proximité (inverse de la distance) de ce contact. Dans l'application réelle, on peut introduire diverse options qui vont légèrement modifier l'évaluation du risque de contagion.
+Une option "plexiglass" pour indiquer un mur leger afin de tenir compte de mesure de protection physiques entre persones. On peut aussi prévoir une option qui indique si tout l'entourage porte un masque, partiellement ou pas de tout.
 
-Imaginons que Carole développe des symptômes au Covid-19. Son médecin lui procure un droit à être testé et il s'avère qu'elle est positive. Son médecin fait générer par le serveur un code à usage unique, qui servira à Carole à déclarer qu'elle est contagieuse. La saisie de code évite que n'importe qui, robot compris se séclarent contagieux.
+Les contacts s'enregistrent de manière symétrique comme dans la vie réelle. 
+Une personne malveillante peut espioner les message émis avec une importante distance en utilisant une antenne directionnelle, sans emmetre de message.
+Elle peut aussi envoyer de très nombreux messages (attaque DOS) pour saturer les smartphones à proximité.
+Ce sont les couches basses qui filtrent ces attaques. L'API commune Apple-Google devrait faciliter le travail.
 
-Carole est libre d'informer le serveur de ces contacts passés avec le degré de détail qu'elle désire. Plus elle donne d'information, et plus le travail des épidémiologiste est facilité, meilleures seront les probabilités de risque de contagion pour les autres et donc plus pertinents seront mesures conséillées aux contacts passés avec Carole.
-Elle peut founir la liste des IDs correspondant à des contacts, seulement une partie de cette liste si elle veut cacher un déplacement chez son amant. Elle peut chosir d'associer les positions géographiques, si elles ont été enregistrées (GPS ou GSM) lors des contacts. Enfin, elle peut envoyer des données personelles tel que son age ou ses antécédents médicaux.
+Le scénario est le suivant:
+Au debut, les quatres personnes restent séparées
+Ensuite Alice rencontre Bob, 
+puis Bob déjeune avec Carol,
+Quelque temps plus tard, il se promène avec elle dans le parc
+Enfin, David rend visite à Alice.
 
-Le serveur va partager publiquement l'historique de contact des personnes infectées, sans données de géolocalisation, sans connaitre leur identité.
+Imaginons que Carol développe des symptômes au Covid-19. Son médecin lui procure un droit à être testé et il s'avère qu'elle est positive. Son médecin fait générer par le serveur un code à usage unique, qui servira à Carole à déclarer qu'elle est contagieuse. La saisie de code évite que n'importe qui, robot compris se séclare contagieux.
 
-Tous les utilisateurs de l'app vont régulièrement, par exemple tous les jours en utilisant une connxion filaire ou wifi, intéroger le serveur qui retourne à l'appli les nouvelles données de contact des personnes infectées.
+Carole est libre d'informer le serveur des contacts passés avec le degré de détail qu'elle désire. Plus elle donne d'information, et meilleures sera l'analyse de risque qui en sera déduite. 
+L'app lui représente sa liste de contacts et elle peut choisir de ne pas diffuser certains, à certaines date ou en fonction du lieu enregistré du contact (si GPS/GSM activé).
 
-Ensuite, localement au téléphone, un vecteur-score est calculé avec plusieurs scénarios possibles
-L'utilisateur peut être invité à prendre certaines mesures de protection (port du masque, demande de test, quanrantaine).
-Il peut aussi être invité à contacter au téléphone l'autorité sanitaire, qui à la vue de données personnelles, fournies par l'app ou ajouté lors de l'interview, pourra prendre des recommendations encore plus précises, encore plus individualisées.
-Il n'y a aucun mécanisme pour vérifier ensuite l'application des mesures recommandées.
+Dans notr exemple, David est aussi malade et décide que plutôt que de fournir une liste, il donne simplement sa clé racine, ce qui permettra au serveur de reconstituer tout son historique de contact.
 
-Si Rt passe durablement en dessous de 1 ou si un vaccin est trouvé, alors les déclarations Convid-plus ne vont s'épuiser. Le serveur n'aura plus de données nouvelles à fournir. Comme le risque de contagion est fonction de l'age des rencontres passées, le vesteur score de tous lesindividus vont tendre vers la valeur par défaut, indiquant un risque nul. L'app n'est plus utile.
+Le serveur va partager publiquement l'historique des contacts des personnes infectées, sans aucune autre données de géolocalisation, sans connaitre l'identité ni le nombre de personnes infectées.
 
-Dans l'interface de l'app, je recommande d'afficher un indicateur "bulle" (voir https://adox.io/bulle.pdf) qui indique au porteur s'il respecte ou pas les règles de distanciation.
+Tous les jours, en utilisant une connexion filaire ou wifi pour les téléphones sans carte SIM, l'app intéroge le serveur pour avoir la mise à jour des contacts des personnes infectées et la mise à jour du modèle d'épidémiologie.
+Après application de ce modèle, l'app est capable de proposer un ensemble de mesures individuelle à prendre.
+
+Il n'y a en revanche aucun mécanisme pour vérifier ensuite l'application des mesures recommandées.
+
+Si avec cet outils et d'autres, Rt passe durablement en dessous de 1 ou si un vaccin est trouvé, alors il y aura de moins en moins de déclarations Convid-plus sur le serveur.
+Comme le risque de contagion est fonction des dates des rencontres passées, le risque va tendre vers zéro. L'app ne sera plus utile.
+
+AU niveau de l'interface de l'app, je recommande d'afficher un indicateur "bulle" (voir https://adox.io/bulle.pdf) qui indique au porteur s'il respecte ou pas les règles de distanciation.
 
 ## Extensions
 
