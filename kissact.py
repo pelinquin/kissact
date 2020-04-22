@@ -3,7 +3,7 @@
  KISSACT - Keep Stupid Simple Automatic Contact Tracing - https://github.com/pelinquin/kissact
 """
 
-import hashlib, secrets, random
+import hashlib, secrets, random, operator
 PREFIX = b'\x19'
 PAD = lambda s:(len(s)%2)*'0'+s[2:]
 
@@ -17,8 +17,9 @@ def b2h(x):
 def contact(u1, u2, duration=1, proximity=1, price=0):
         " 1B:PREFIX + 12B:EphIds + 2B:Hash + 1B:Price -> 16B BLEid "
         if price > 0:
-                u1.ids[-1][0] = u1.ids[-1][0][:-3] + u2.ids[-1][0][:2] + i2b(price, 1)
+                u1.ids[-1][0] = u1.ids[-1][0][:-3] + u2.ids[-1][0][1:3] + i2b(price, 1)
                 u1.balance, u2.balance = u1.balance + price, u2.balance - price
+                u2.note[u1.ids[-1][0]] = u1.refe[u1.ids[-1][0]] = True
         u1.cts[u2.ids[-1][0]] = (len(u1.ids), duration, proximity)
         u2.cts[u1.ids[-1][0]] = (len(u1.ids), duration, proximity)
         u1.ids[-1][1][2] = u2.ids[-1][1][2] = True 
@@ -29,7 +30,7 @@ class ctApp:
                 " Name is not required for the real app "
                 self.name, self.age, self.hist, self.balance = name, age, [], 0
                 self.root = PREFIX + secrets.token_bytes(12) + b'\0'*3
-                self.ids, self.cts, self.risk = [], {}, 0
+                self.ids, self.cts, self.risk, self.note, self.refe = [], {}, 0, {}, {}
                 self.coef = (14, 1, 60, 1.2, 100)
 
         def next(self):
@@ -41,16 +42,20 @@ class ctApp:
         def log(self):
                 " Just for debugging "
                 print ('USER', self.name, 'Balance:', self.balance, 'Said:', len(self.ids), 'ids')
-                for i, j in enumerate(self.ids): print ('%02d'%(i+1), b2h(j[0]),j[1:])
+                for i, j in enumerate(self.ids): print ('%02d'%(i+1), b2h(j[0][1:]),j[1:])
                 print ('USER', self.name, 'Heard:', len(self.cts), 'ids')
-                for x in self.cts: print ('  ', b2h(x), self.cts[x])
+                for x in self.cts: print ('  ', b2h(x[1:]), self.cts[x])
 
         def test(self, s):
                 " Updates parametric model "
+                # virus
                 self.coef = s.coef 
                 for i in [x for x in s.get() if x in self.cts]: self.hist.append(self.cts[i])
                 print ('%s: %2d contacts, %2d contacts+, balance:%d'% (self.name, len(self.cts), len(self.hist), self.balance))
                 self.model()
+                # banking
+                for x in self.note.keys(): s.house[0][x] = True
+                for x in self.refe.keys(): s.house[1][x] = True
                 
         def model(self):
                 " Epidemiologists should define all parameters values "
@@ -72,6 +77,7 @@ class ctServer:
         " Public backend "
         def __init__(self, param):
                 self.inf, self.tick, self.coef = [], 0, param
+                self.house = [{}, {}]
         def declare(self, ids):
                 for x in ids: self.inf.append(x)
         def get(self):
@@ -82,6 +88,7 @@ class ctServer:
                         for x in u: x.next()
         def test(self, u):
                 for x in u: x.test(self)
+                if not operator.eq(s.house[0],s.house[1]): print ('ERROR!', s.house)       
         def log(self, u):
                 print (__doc__, __file__, sum(1 for l in open(__file__)), 'lines')
                 for x in u: x.log()
@@ -99,7 +106,9 @@ if __name__ == "__main__":
         s.next_epoch(u, 2)                      # 2 steps
         s.declare(u[2].filter(True))            # Carol is sick and gives a subset of her EphIds
         s.declare(u[3].filter())                # David is sick and gives all EphIds
-        s.next_epoch(u, 4)                      # 4 steps       
+        s.next_epoch(u, 4)                      # 4 steps
+        contact(u[3], u[2], 100, 10, 10)        # David pays 10 to Carol
+        s.next_epoch(u, 2)                      # 2 steps
         s.log(u)                                # log display
         s.test(u)                               # only Bob got a risk warning
 # end
