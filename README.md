@@ -81,7 +81,7 @@ This extension requires a declaration to a civil registry office in order to be 
 
 The monetary unit is universal. It is initialized with an approximate energy value of 1kW, or about 10 euro cents. The price of each product exchangeable through this accounting system is free and maximum of about 25€.
 
-Payment can also be made through the use of a shared object such as a distributor, a counter or a resource carrier. For this reason it must be possible to implement the KISSACT protocol on a BLE device other than a smartphone. Several projects are under study, based on ESP32, nRF52 or with a RaspberryPi-zero card equipped with a battery (hat). 
+Payment can also be made through the use of a shared object such as a distributor, a counter or a transporter ([babcar](https://adox.io/rfp.pdf)). For this reason it must be possible to implement the KISSACT protocol on a BLE device other than a smartphone. Several projects are under study, based on ESP32, nRF52 or with a RaspberryPi-zero card equipped with a battery (hat). 
 
 ## Next
 
