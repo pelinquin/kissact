@@ -83,6 +83,13 @@ The monetary unit is universal. It is initialized with an approximate energy val
 
 Payment can also be made through the use of a shared object such as a distributor, a counter or a resource carrier. For this reason it must be possible to implement the KISSACT protocol on a BLE device other than a smartphone. Several projects are under study, based on ESP32, nRF52 or with a RaspberryPi-zero card equipped with a battery (hat). 
 
+## Next
+
+I'm planning a slightly more complete version of KISSACT.
+Communications will be through sockets.
+- UDP socket between phones to simulate BLE beacons
+- TCP socket between phone and server to simulate HTTP communication
+
 ____
 
 ## Contact
