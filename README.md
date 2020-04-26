@@ -1,5 +1,7 @@
 # KISSACT - Keep It Stupid Simple Automatic Contact Tracing
 
+*The KISSACT algorithm is based on the [DP3T](https://github.com/DP-3T) algorithm and adds a merchant exchange function with generalized transaction. However, the current version lacks the verification of account uniqueness and the verification of not exceeding the self-borrowing limit.*
+
 ## Introduction
 
 KISSACT is a contribution to the projects of apps for smartphones (+connected objects) and server (HTTP) of health authorities to allow an automatic and **individualized** processing of preventive measures against a pandemic, like the one of Covid-19.
