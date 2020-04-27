@@ -1,6 +1,6 @@
 # KISSACT - Keep It Stupid Simple Automatic Contact Tracing
 
-*The KISSACT algorithm is based on the [DP3T](https://github.com/DP-3T) algorithm and adds a merchant exchange function with generalized transaction. However, the current version lacks the verification of account uniqueness*
+*The KISSACT algorithm is based on the [DP3T](https://github.com/DP-3T) Low-Cost algorithm and adds a merchant exchange function with generalized transaction. However, the current version lacks the verification of account uniqueness.*
 
 ## Introduction
 
