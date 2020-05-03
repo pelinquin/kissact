@@ -88,8 +88,9 @@ Payment can also be made through the use of a shared object such as a distributo
 ## Next
 
 The *beacon.py* is limited to contact tracing but with :
-- UDP sockets between phones to simulate BLE beacons
-- a local HTTP server to simulate the backend
+- UDP sockets between phones to simulate BLE beacons,
+- a local HTTP server to simulate the backend.
+
 Test it !
 
 ____
