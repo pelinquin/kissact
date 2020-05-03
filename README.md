@@ -87,14 +87,13 @@ Payment can also be made through the use of a shared object such as a distributo
 
 ## Next
 
-I'm planning a slightly more complete version of KISSACT.
-Communications will be through sockets.
-- UDP socket between phones to simulate BLE beacons
-- TCP socket between phone and server to simulate HTTP communication
+The *beacon.py* is limited to contact tracing but with :
+- UDP sockets between phones to simulate BLE beacons
+- a local HTTP server to simulate the backend
+Test it !
 
 ____
 
 ## Contact
 
 laurent.fournier@adox.io
-
