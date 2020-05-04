@@ -85,13 +85,17 @@ The monetary unit is universal. It is initialized with an approximate energy val
 
 Payment can also be made through the use of a shared object such as a distributor, a counter or a transporter ([babcar](https://adox.io/rfp.pdf)). For this reason it must be possible to implement the KISSACT protocol on a BLE device other than a smartphone. Several projects are under study, based on ESP32, nRF52 or with a RaspberryPi-zero card equipped with a battery (hat). 
 
-## Next
+## New
 
-The *beacon.py* is limited to contact tracing but with :
+The *beacon.py* program is limited to contact tracing but with :
 - UDP sockets between phones to simulate BLE beacons,
 - a local HTTP server to simulate the backend.
 
-Test it !
+The *doctor.py* program generates keycode to give to covid+ patient in order for here to upload ids
+
+## Next
+- use the "unlinked" DP-3T version
+- port beacon code on iOs. I need a simple BLE layer for that.
 
 ____
 
