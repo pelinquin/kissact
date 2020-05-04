@@ -91,7 +91,7 @@ The *beacon.py* program is limited to contact tracing but with :
 - UDP sockets between phones to simulate BLE beacons,
 - a local HTTP server to simulate the backend.
 
-The *doctor.py* program generates keycode to give to covid+ patient in order for here to upload ids
+The *doctor.py* program generates keycode to give to covid+ patient in order for her to upload ids.
 
 ## Next
 - use the "unlinked" DP-3T version
