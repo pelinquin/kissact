@@ -7,7 +7,7 @@ use ./doctor.py to generate codekey for covid+ person
 https://github.com/pelinquin/kissact
 """
 
-import socket, threading, secrets, dbm, ecc, http.server, socketserver, urllib, requests, re
+import socket, threading, secrets, dbm, ecc, http.server, socketserver, urllib, requests, re, random
 
 BASP = 5000        # Base port number
 MAXC = 10          # Max contacts
@@ -19,26 +19,27 @@ MINF = 100         # max number of infected people
 URLB = 'http://%s:%d' %(HOST, PORT)         
 
 class beacon:
-    ear, say, go = {}, {}, False
+    ear, say, cts, go, current = {}, {}, {}, False, None
     def __init__(self, arg):
         self.p, s = int(arg), socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         threading.Thread(target=self.server).start()
         threading.Thread(target=self.client).start()
         while (True):
             c = input()
-            if c == "u": self.update()                        # hit d -> download
-            elif c == "g": self.stopgo()                      # hit g -> stop/go
-            elif c == "s" and self.go == False: self.status() # hit g -> display status if stop
-            elif len(c) > 24 and len(c) < 90: self.upload(c)  # -> try upload
+            if   c == "u": self.update()                             # -> download
+            elif c == "g": self.stopgo()                             # -> stop/go
+            elif c == "s" and self.go == False: print(self.status()) # -> display status if stop
+            elif len(c) > 24 and len(c) < 90: self.upload(c)         # -> try upload
             else: print('command not valid')
 
     def status(self):
         exposed = {}
         if ecc.os.path.isfile('db/e%s' % self.p):
             with dbm.open('db/e%s' % self.p) as b:
-                for x in b.keys(): exposed[x] = True
+                for x in b.keys(): exposed[x] = ecc.b2i(b[x])
             with dbm.open('db/h%s' % self.p) as b:
-                for x in [y for y in b.keys() if y in exposed]: print('risk')
+                for x in [y for y in b.keys() if y in exposed]: return 'risk level %d' % exposed[x]
+        return 'ok'
 
     def stopgo(self):
         print ("go/stop")
@@ -53,14 +54,21 @@ class beacon:
                     n, i = now(), i + 1
                     if not i%EPOC:
                         m = arg.encode('utf-8') + secrets.token_bytes(12)
-                        self.dump(b)
+                        self.dump(b, all=False)
                     z = self.say[m]+1 if m in self.say else 0
-                    self.say[m], b[m] = z, ecc.i2b(i, 4) + ecc.i2b(z, 4)                        
+                    # lattitude/longitude if captured (data stay on the phone!)
+                    lt, lo = ecc.i2b(random.randint(0, 1000), 2), ecc.i2b(random.randint(0, 1000), 2)
+                    self.say[m], b[m] = z, ecc.i2b(i, 4) + ecc.i2b(z, 4) + lt + lo
+                    self.current = m
                     for x in [y for y in range(MAXC) if self.p!=BASP+y]: s.sendto(m, (HOST, BASP+x))
                     
-    def dump(self, b):
+    def dump(self, b, all=True):
         f = open('db/d%s' % self.p, 'bw')
-        for i in b.keys(): f.write(i) 
+        for i in b.keys():
+            if all:             f.write(i + ecc.i2b(1, 4)) # all ids
+            elif i in self.cts: f.write(i + ecc.i2b(1, 4)) # only ids with contacts
+        with dbm.open('db/h%s' % self.p, 'c') as bb:
+            for i in bb.keys(): f.write(i + ecc.i2b(2, 4)) # second level contacts ids
         f.close()
                                 
     def server(self):
@@ -71,9 +79,10 @@ class beacon:
             if now() - n <= 4: buf[m] = True
             else: n, buf = now(), {}
             z = self.ear[m]+1 if m in self.ear else 0
-            print (m, z, len(buf))
+            if self.current: self.cts[self.current] = m
+            print (m, z, len(buf), self.current)
             with dbm.open('db/h%s' % self.p, 'c') as b: # heard ids
-                self.ear[m], b[m] = z, ecc.i2b(now(), 4) + ecc.i2b(z, 4)
+                self.ear[m], b[m] = z, ecc.i2b(now(), 4) + ecc.i2b(z, 4) 
 
     def upload(self, c):
         print ('Try to upload to backend with code\n%s' %c)
@@ -103,7 +112,7 @@ class handler(http.server.BaseHTTPRequestHandler):
         
     def do_POST(self):
         data = self.rfile.read(int(self.headers['Content-Length']))
-        open('log', 'bw').write(data)
+        #open('log', 'bw').write(data)
         (code, pos) = self.extract(data)
         (ids, pos) = self.extract(data[pos:])
         if len(code)>0 and len(code)<90 and len(ids)>0:
@@ -115,7 +124,7 @@ class handler(http.server.BaseHTTPRequestHandler):
                         if x == k and b[x] == d + b' ' + p:
                             b[x] = d
                             with dbm.open('backend', 'c') as bb:
-                                for x in range(len(ids)//16): bb[ids[16*x:16*(x+1)]] = b''
+                                for x in range(len(ids)//20): bb[ids[20*x:20*x+16]] = ids[20*x+16:20*(x+1)]
                             print ('backend server well updated with your data')
         self._set_response()
         self.wfile.write("POST request for {}".format(self.path).encode('utf-8'))
@@ -128,12 +137,23 @@ class backend():
     root = secrets.token_bytes(16)
     def __init__(self):
         k = ecc.i2b(0, 16)
-        with dbm.open('keys', 'c') as b:
-            for i in range(MINF):
-                k = ecc.hashlib.sha256(self.root + k).digest()[:16]
-                b[ecc.z56encode(k)] = b''
+        if not ecc.os.path.exists('keys'):
+            with dbm.open('keys', 'c') as b:
+                for i in range(MINF):
+                    k = ecc.hashlib.sha256(self.root + k).digest()[:16]
+                    b[ecc.z56encode(k)] = b''
         threading.Thread(target=self.serve).start()
         print(__doc__, "serving at port", PORT)
+        while (True):
+            c = input()
+            if c == 'i': print('Infected:%d' % self.nb())
+            else: print('command not valid')
+                
+    def nb(self):
+        if not ecc.os.path.exists('keys'): return 0
+        with dbm.open('keys') as b:
+            return sum([1 for x in b.keys() if len(b[x])>0])
+                        
         
     def serve(self):
         socketserver.TCPServer((HOST, PORT), handler).serve_forever()
