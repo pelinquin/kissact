@@ -1,4 +1,5 @@
-# KISSACT - Keep It Stupid Simple Automatic Contact Tracing
+# KISSACT - AP
+# Keep It Stupid Simple Automatic Contact Tracing...and Payment
 
 *The KISSACT algorithm is based on the [DP3T](https://github.com/DP-3T) Low-Cost algorithm and adds a merchant exchange function with generalized transaction. However, the current version lacks the verification of account uniqueness.*
 
@@ -87,7 +88,7 @@ Payment can also be made through the use of a shared object such as a distributo
 
 ## New
 
-The *beacon.py* program is limited to contact tracing but with :
+The *beacon.py* program now includes a basic payement system with :
 - UDP sockets between phones to simulate BLE beacons,
 - a local HTTP server to simulate the backend.
 
