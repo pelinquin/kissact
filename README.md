@@ -1,5 +1,5 @@
-# KISSACT - AP
-# Keep It Stupid Simple Automatic Contact Tracing ... And Payment !
+# KISSACT&P
+# Keep It Stupid Simple Automatic Contact Tracing and Payment !
 
 *The KISSACT algorithm is based on the [DP3T](https://github.com/DP-3T) Low-Cost algorithm and adds a merchant exchange function with generalized transaction. However, the current version lacks the verification of account uniqueness.*
 
