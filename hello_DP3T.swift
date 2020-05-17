@@ -1,4 +1,5 @@
- // Hello World! for iOS DP3T Contact Tracing
+ // Hello World for iOS DP3T Contact Tracing
+// Do not forget to add BLE & Location in info.plist and reference DP3TSDK
 
 import DP3TSDK_CALIBRATION
 import SnapKit
@@ -47,13 +48,11 @@ class viewController: UIViewController {
             make.top.equalTo(self.view.layoutMarginsGuide).inset(12)
         }
         stac.axis = .vertical
-        stat.text = "STATUS"
-        epid.text = "EPHID"
         epid.font = epid.font.withSize(15)
-        date.text = "DATE"
-        dist.text = "DISTANCE"
-        txtx.text = "TX"
-        rssi.text = "RSSI"
+        do {
+            let resp = try DP3TTracing.getHandshakes(request: HandshakeRequest(offset: 0, limit: 1))
+            disp(resp.handshakes[0])
+        } catch { print ("ERROR") }
         stac.addArrangedSubview(stat)
         stac.addArrangedSubview(epid)
         stac.addArrangedSubview(date)
@@ -62,12 +61,27 @@ class viewController: UIViewController {
         stac.addArrangedSubview(rssi)
         DP3TTracing.delegate = self
     }
+    
+    func disp(_ hs: HandshakeModel) {
+        DP3TTracing.status { result in
+            switch result {
+                case let .success(state):
+                    stat.text = "Contacts: \(state.numberOfContacts) Handshakes: \(state.numberOfHandshakes)"
+                case .failure: break
+            }
+        }
+        epid.text = hs.ephID.hexEncodedString
+        date.text = hs.timestamp.stringVal
+        dist.text = hs.distance == nil ? "--" : String(format: "%.2fm", hs.distance!)
+        txtx.text = hs.TXPowerlevel == nil ? " -- " : String(format: "%.2f", hs.TXPowerlevel!)
+        rssi.text = hs.RSSI == nil ? " -- " : String(format: "%.2f", hs.RSSI!)
+    }
 }
 
 extension Date {
     var stringVal: String {
         let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "HH:mm:ss "
+        dateFormatter.dateFormat = "MMMMd  HH:mm:ss "
         return dateFormatter.string(from: self)
     }
 }
@@ -79,30 +93,6 @@ extension Data {
 }
 
 extension viewController: DP3TTracingDelegate {
-    func DP3TTracingStateChanged(_: TracingState) {
-        DP3TTracing.status { result in
-            switch result {
-                case let .success(state): print(state)
-                case .failure: break
-            }
-        }
-    }
-    func didAddHandshake(_ handshake: HandshakeModel) {
-        do {
-            DP3TTracing.status { result in
-                switch result {
-                case let .success(state):
-                    stat.text = "Contacts: \(state.numberOfContacts) Handshakes: \(state.numberOfHandshakes)"
-                case .failure: break
-                }
-            }
-            let resp = try DP3TTracing.getHandshakes(request: HandshakeRequest(offset: 0, limit: 1))
-            let hs = resp.handshakes[0]
-            epid.text = hs.ephID.hexEncodedString
-            date.text = hs.timestamp.stringVal
-            dist.text = hs.distance == nil ? "--" : String(format: "%.2fm", hs.distance!)
-            txtx.text = hs.TXPowerlevel == nil ? " -- " : String(format: "%.2f", hs.TXPowerlevel!)
-            rssi.text = hs.RSSI == nil ? " -- " : String(format: "%.2f", hs.RSSI!)
-        } catch { print ("ERROR") }
-    }
+    func DP3TTracingStateChanged(_: TracingState) {}
+    func didAddHandshake(_ hs: HandshakeModel) { disp(hs) }
 }
