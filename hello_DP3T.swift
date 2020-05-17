@@ -1,4 +1,4 @@
- // Hello World for iOS DP3T Contact Tracing
+// Hello World! code for iOS DP3T Contact Tracing
 // Do not forget to add BLE & Location in info.plist and reference DP3TSDK
 
 import DP3TSDK_CALIBRATION
@@ -48,10 +48,11 @@ class viewController: UIViewController {
             make.top.equalTo(self.view.layoutMarginsGuide).inset(12)
         }
         stac.axis = .vertical
-        epid.font = epid.font.withSize(15)
+        epid.font = epid.font.withSize(20)
+        epid.numberOfLines = 17
         do {
             let resp = try DP3TTracing.getHandshakes(request: HandshakeRequest(offset: 0, limit: 1))
-            disp(resp.handshakes[0])
+            if resp.handshakes != [] { disp(resp.handshakes[0]) } else { disp_init() }
         } catch { print ("ERROR") }
         stac.addArrangedSubview(stat)
         stac.addArrangedSubview(epid)
@@ -66,7 +67,7 @@ class viewController: UIViewController {
         DP3TTracing.status { result in
             switch result {
                 case let .success(state):
-                    stat.text = "Contacts: \(state.numberOfContacts) Handshakes: \(state.numberOfHandshakes)"
+                    stat.text = "Contacts: \(state.numberOfContacts)   Handshakes: \(state.numberOfHandshakes)"
                 case .failure: break
             }
         }
@@ -75,6 +76,15 @@ class viewController: UIViewController {
         dist.text = hs.distance == nil ? "--" : String(format: "%.2fm", hs.distance!)
         txtx.text = hs.TXPowerlevel == nil ? " -- " : String(format: "%.2f", hs.TXPowerlevel!)
         rssi.text = hs.RSSI == nil ? " -- " : String(format: "%.2f", hs.RSSI!)
+    }
+    
+    func disp_init() {
+        stat.text = "--"
+        epid.text = "--"
+        date.text = "--"
+        dist.text = "--"
+        txtx.text = "--"
+        rssi.text = "--"
     }
 }
 
@@ -88,7 +98,7 @@ extension Date {
 
 extension Data {
     var hexEncodedString: String {
-        return map { String(format: "%02hhx", $0) }.joined()
+        return map { String(format: "%02hhX\n", $0) }.joined()
     }
 }
 
