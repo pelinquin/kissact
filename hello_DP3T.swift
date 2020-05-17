@@ -1,3 +1,5 @@
+ // Hello World! for iOS DP3T Contact Tracing
+
 import DP3TSDK_CALIBRATION
 import SnapKit
 import UIKit
@@ -25,61 +27,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 }
 
 class viewController: UIViewController {
-    let stackView = UIStackView()
+    let stac = UIStackView()
+    let stat = UILabel()
     let epid = UILabel()
     let date = UILabel()
     let dist = UILabel()
     let txtx = UILabel()
     let rssi = UILabel()
     
-    init() {
-        super.init(nibName: nil, bundle: nil)
-    }
+    init() { super.init(nibName: nil, bundle: nil) }
     required init?(coder _: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        Default.shared.tracingMode = .active
         self.view.backgroundColor = .systemBackground
-        view.addSubview(stackView)
-        stackView.snp.makeConstraints { make in
+        view.addSubview(stac)
+        stac.snp.makeConstraints { make in
             make.left.right.bottom.equalTo(self.view.layoutMarginsGuide)
             make.top.equalTo(self.view.layoutMarginsGuide).inset(12)
         }
-        stackView.axis = .vertical
-        do {
-            epid.text = "EPHID"
-            epid.font = epid.font.withSize(15)
-            date.text = "DATE"
-            dist.text = "DISTANCE"
-            txtx.text = "TX"
-            rssi.text = "RSSI"
-            stackView.addArrangedSubview(epid)
-            stackView.addArrangedSubview(date)
-            stackView.addArrangedSubview(dist)
-            stackView.addArrangedSubview(txtx)
-            stackView.addArrangedSubview(rssi)
-            let button = UIButton()
-            button.setTitleColor(.systemBlue, for: .normal)
-            button.setTitle("Update ephId", for: .normal)
-            button.addTarget(self, action: #selector(go), for: .touchUpInside)
-            stackView.addArrangedSubview(button)
-        }
-    }
-
-    @objc func go() {
-        do {
-            let req = HandshakeRequest(offset: 0, limit: 1)
-            let hs: HandshakeModel
-            let resp = try DP3TTracing.getHandshakes(request: req)
-            print ("HANDSHAKE", resp.handshakes.count)
-            hs = resp.handshakes[0]
-            epid.text = hs.ephID.hexEncodedString
-            date.text = hs.timestamp.stringVal
-            dist.text = hs.distance == nil ? "--" : String(format: "%.2fm", hs.distance!)
-            txtx.text = hs.TXPowerlevel == nil ? " -- " : String(format: "%.2f", hs.TXPowerlevel!)
-            rssi.text = hs.RSSI == nil ? " -- " : String(format: "%.2f", hs.RSSI!)
-        } catch { print ("ERROR") }
+        stac.axis = .vertical
+        stat.text = "STATUS"
+        epid.text = "EPHID"
+        epid.font = epid.font.withSize(15)
+        date.text = "DATE"
+        dist.text = "DISTANCE"
+        txtx.text = "TX"
+        rssi.text = "RSSI"
+        stac.addArrangedSubview(stat)
+        stac.addArrangedSubview(epid)
+        stac.addArrangedSubview(date)
+        stac.addArrangedSubview(dist)
+        stac.addArrangedSubview(txtx)
+        stac.addArrangedSubview(rssi)
+        DP3TTracing.delegate = self
     }
 }
 
@@ -97,23 +78,31 @@ extension Data {
     }
 }
 
-class Default {
-    static var shared = Default()
-    var store = UserDefaults.standard
-    
-    enum TracingMode: Int {
-        case none = 0
-        case active = 1
-        case activeReceiving = 2
-        case activeAdvertising = 3
+extension viewController: DP3TTracingDelegate {
+    func DP3TTracingStateChanged(_: TracingState) {
+        DP3TTracing.status { result in
+            switch result {
+                case let .success(state): print(state)
+                case .failure: break
+            }
+        }
     }
-    var tracingMode: TracingMode {
-        get {
-            let mode = (store.object(forKey: "org.dpppt.sampleapp.tracingMode") as? Int) ?? 0
-            return TracingMode(rawValue: mode) ?? .none
-        }
-        set(newValue) {
-            store.set(newValue.rawValue, forKey: "org.dpppt.sampleapp.tracingMode")
-        }
+    func didAddHandshake(_ handshake: HandshakeModel) {
+        do {
+            DP3TTracing.status { result in
+                switch result {
+                case let .success(state):
+                    stat.text = "Contacts: \(state.numberOfContacts) Handshakes: \(state.numberOfHandshakes)"
+                case .failure: break
+                }
+            }
+            let resp = try DP3TTracing.getHandshakes(request: HandshakeRequest(offset: 0, limit: 1))
+            let hs = resp.handshakes[0]
+            epid.text = hs.ephID.hexEncodedString
+            date.text = hs.timestamp.stringVal
+            dist.text = hs.distance == nil ? "--" : String(format: "%.2fm", hs.distance!)
+            txtx.text = hs.TXPowerlevel == nil ? " -- " : String(format: "%.2f", hs.TXPowerlevel!)
+            rssi.text = hs.RSSI == nil ? " -- " : String(format: "%.2f", hs.RSSI!)
+        } catch { print ("ERROR") }
     }
 }
