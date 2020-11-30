@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """ 
   **** EHANCED SIGNATURE ****
-_______________________________
+_________________________________________________________________
  Use the 'esig' iOS app to test an a real device
 USAGE: 
  './esig.py'       -> run Public (PUB)
@@ -19,16 +19,18 @@ COMMUNICATIONS:
  HTTP for real smartphone with Public
  QRCODE or BLE or NFC between smartphones
 FORMAT: 
- message(13):src(4)+dst(4)val(3)nb(2)+sign(96) -> (109)
- (Production system may use 5 bytes ID length, not 4)
+ message(16):src(5)+dst(5)+val(3)+type(1)+date(2)+sign(96)=(112)
  Persistant data use a Key-Value Database (Berkeley)
- (8:5)     src|dst:val|nb for a collected transaction 
- (9:5) '_'|src|dst:val|nb for a pending   transaction
+ (16:96) src|dst|val|typ|date : sign => reconding transaction 
+ (10:18)     src|dst : val|tax|date  => collected transaction
+ (11:18) '_'|src|dst : val|tax|date  => pending   transaction
+ (2:6)       group : cumul
+ (3:4)   '_'|group : points 
 FORMAL DEFINITIONS:
  * Let H a human owning a smartphone
  * Let P a 'Public' server or public mesh of servers
  * Let E called an 'Economy' a: 
-  Square Sparse Square Matrix of Natural Couple with Humans-ID dimensions
+  Sparse Square Matrix of Natural Couple with Humans-ID indix
   Only 'Public' records an Enconomy
  * Let C called a 'Cross' an Economy (Sparce Square Matrix) with: 
   1/ Both diagional vectors with at most one non nul couple
@@ -42,6 +44,8 @@ FORMAL DEFINITIONS:
  * Let T called a Transaction a:
   message Buyer-ID|Selled-ID|Price|Date 
   + Signature by Buyer-ID of the message
+SIGNATURE:
+ ecc :ECDSA P384 + SHA384-> len(pk)=len(sk)=48 len(sig)=96
 OPERATIONS:
  The 3 allowed operations on an economy are:
   1/ Register one Human
@@ -55,14 +59,16 @@ TODO:
  - Non-regression testing
  - FAQ
  - Switch assert sentences to error managment
-_________________________________
-CONTACT: laurent.fournier@adox.io
+__________________________________________________________________
+CONTACT: laurent.fournier@adox.io (https://adox.io)
 """
 
 import socket, threading, ecc, re, dbm, http.server, socketserver, json, urllib, requests
 MAXP = 10              # Max nb phones
-DEBT = 100             # Self-debt limit
-RLEN = 109             # Request len (message+signature)
+DEBT = 1000            # Self-debt limit
+RLEN = 112             # Request len (message+signature)
+DBKL = 10              # Key   record length
+DBVL = 8               # Value record length 
 HOST = '192.168.1.13'  # local host
 HMIP = '91.168.92.157' # My home IP4 for testing
 BASP = 5000            # Base port number
@@ -77,7 +83,7 @@ class node:
         threading.Thread(target=s.server).start()
         if s.n == 'PUB':
             threading.Thread(target=s.http, args=(s,)).start()
-            #print(requests.get(URLH).content.decode('utf-8')) # debug
+            #print(requests.get(URLH).content.decode('utf-8')) # debug at home !
         while (True):
             c = input('%s>' % s.n)
             if   re.match('^\s*(I|INIT)\s*$',           c, re.I):  print (s.init())
@@ -97,7 +103,7 @@ class node:
             try:
                 m, a = t.recvfrom(1024)
                 name = m[48:].decode('utf-8')
-                s.tbl[name], s.tid[name], s.tpk[m[:4]], s.rvs[m[:4]] = a[1], m[:4], m[4:48], name
+                s.tbl[name], s.tid[name], s.tpk[m[:5]], s.rvs[m[:5]] = a[1], m[:5], m[5:48], name
             except: break
         t.settimeout(None)
         s.savepks()
@@ -106,18 +112,18 @@ class node:
     def commit(s, r):
         t, k = socket.socket(socket.AF_INET, socket.SOCK_DGRAM), ecc.ecdsa()
         isn, val, rcp = (r.v.group(1) != 'PUB'), int(r.v.group(2)), r.v.group(3).upper()
-        if s.check(s.tid[s.n], val) == False: return
+        assert s.check(s.tid[s.n], val)
         assert rcp in s.tbl and s.n != rcp and s.n != 'PUB'
-        assert s.bal('PUB') == 0 and s.time('PUB') == 0
-        msg = s.tid[s.n] + s.tid[rcp] + ecc.i2b(val, 3) + s.pos(s.tid[s.n] + s.tid[rcp]) 
-        s.add(msg)
+        assert s.bal(s.tid['PUB']) == 0 and s.time(s.tid['PUB']) == 0
+        msg = s.tid[s.n] + s.tid[rcp] + ecc.i2b(val, 3) + ecc.z1 + s.pos(s.tid[s.n] + s.tid[rcp]) 
         k.privkey = s.getsk()
         sgn = k.sign(msg)
+        s.add(msg + sgn)        
         if rcp in s.tbl:
-            if isn: t.sendto(msg + sgn, (HOST, s.tbl[rcp]))            
+            if isn: t.sendto(msg + sgn, (HOST, s.tbl[rcp]))
             t.sendto(msg + sgn, (HOST, s.tbl['PUB']))
         else:
-            pass # iphone case
+            print ('iphone') # iphone case
 
     def echo(s, r):
         t = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -129,15 +135,16 @@ class node:
             k = ecc.ecdsa()
             k.generate()
             s.pk = k.compress(k.pt)
-            b[s.n.encode('utf-8')] = s.pk
-            b[b'&'] = ecc.i2b(k.privkey, 48)
+            b[s.n.encode('utf-8')] = s.pk    # My Public  key
+            b[b'&'] = ecc.i2b(k.privkey, 48) # My Private key
+            if s.n == 'PUB': b[ecc.z2], b[b'_'+ecc.z2] = ecc.z6, ecc.z4
             
     def savepks(s):
         with dbm.open(s.n, 'c') as b:
-            for x in s.tpk: b[x] = s.tpk[x]
+            for x in s.tpk: b[x] = s.tpk[x] # Others Public keys
 
     def getsk(s):
-        with dbm.open(s.n) as b: return ecc.b2i(b[b'&'])
+        with dbm.open(s.n) as b: return ecc.b2i(b[b'&']) # Authentication
 
     def readdb(s):
         with dbm.open(s.n) as b:
@@ -156,70 +163,84 @@ class node:
             m, a = t.recvfrom(1024)
             if   m == b'who?': t.sendto(s.pk + s.n.encode('utf-8'), a)
             elif m == b'hi!' : print ('hi!')
-            elif len(m) == RLEN:          s.manage(m)
+            elif len(m) == RLEN:          print (s.manage(m))
             elif len(m)>48 and len(m)<60: s.register(m)
+            else: print ('ko', len(m))
 
     def register(s, m):
         t = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         name = m[48:].decode('utf-8')
-        s.tid[name], s.tpk[m[:4]], s.rvs[m[:4]] = m[:4], m[4:48], name
-        if s.n == 'PUB':
-            for x in [y for y in s.tbl if y != 'PUB']: s.sendpk(s.tid[x], m)
+        s.tid[name], s.tpk[m[:5]], s.rvs[m[:5]] = m[:5], m[5:48], name
+        for x in [y for y in s.tbl if y != 'PUB' and s.n == 'PUB']: s.sendpk(s.tid[x], m)
                 
-    def check(s, p, val):
-        t = 0
-        with dbm.open(s.n) as b:
-            for x in [y for y in b.keys() if len(y) == 8 and len(b[y]) == 5]:
-                if p == x[:4]: t -= ecc.b2i(b[x][:3])
-                if p == x[4:]: t += ecc.b2i(b[x][:3])
-        return val - t < DEBT
-
     def bal(s, p):
+        if s.rvs[p] == 'PUB': return 0
         t = 0
         with dbm.open(s.n) as b:
-            for x in [y for y in b.keys() if len(y) == 8 and len(b[y]) == 5]:
-                if s.tid[p] == x[:4]: t -= ecc.b2i(b[x][:3])
-                if s.tid[p] == x[4:]: t += ecc.b2i(b[x][:3])
+            for x in [y for y in b.keys() if len(y) == DBKL and len(b[y]) == DBVL]:
+                if   p == x[:5]: t -= ecc.b2i(b[x][:3])
+                elif p == x[5:]: t += ecc.b2i(b[x][:3])
+                else: assert s.n == 'PUB'
         return t
-    def bals(s): return {x:s.bal(x) for x in [y for y in s.tid if y != 'PUB']}
+    def bals(s):
+        if s.n == 'PUB':
+            return {s.rvs[x]:s.bal(x) for x in [s.tid[y] for y in s.tid if y != 'PUB']}
+        else:
+            return s.bal(s.tid[s.n])
+    def check(s, p, val): return (val > 0) and (val - s.bal(p) < DEBT)
     
     def ttime(s):
         with dbm.open(s.n) as b:
-            return sum([ ecc.b2i(b[x][3:]) for x in \
-                         [y for y in b.keys() if len(y) == 8 and len(b[y]) == 5]])
+            return sum([ ecc.b2i(b[x][6:]) for x in \
+                         [y for y in b.keys() if len(y) == DBKL and len(b[y]) == DBVL]])
     def time(s, p):
+        if s.rvs[p] == 'PUB': return 0
         t = 0
         with dbm.open(s.n) as b:
-            for x in [y for y in b.keys() if len(y) == 8 and len(b[y]) == 5]:
-                if s.tid[p] == x[:4]: t += ecc.b2i(b[x][3:])
-                if s.tid[p] == x[4:]: t += ecc.b2i(b[x][3:])
+            for x in [y for y in b.keys() if len(y) == DBKL and len(b[y]) == DBVL]:
+                if   p == x[:5]: t += ecc.b2i(b[x][6:])
+                elif p == x[5:]: t += ecc.b2i(b[x][6:])
+                else: assert s.n == 'PUB'
         return t
-    def times(s): return {x:s.time(x) for x in [y for y in s.tid if y != 'PUB']}
-    
+    def times(s):
+        if s.n == 'PUB':
+            return {s.rvs[x]:s.time(x) for x in [s.tid[y] for y in s.tid if y != 'PUB']}
+        else:
+            return s.time(s.tid[s.n])
+        
     def pos(s, z):
         with dbm.open(s.n) as b:
-            return b[z][3:] if z in b else ecc.z2
+            return b[z][6:] if z in b else ecc.z2
         
-    def add(s, m):
-        print ('%s pays %d to %s' % (s.rvs[m[:4]], ecc.b2i(m[8:11]), s.rvs[m[4:8]]))        
-        p = ecc.b2i(m[11:])
-        x, y = m[:8], m[8:11] + ecc.i2b(p + 1, 2)
+    def add(s, m): 
+        print ('%s pays %d to %s' % (s.rvs[m[:5]], ecc.b2i(m[10:13]), s.rvs[m[5:10]]))        
+        p, v, x, y = ecc.b2i(m[14:16]), ecc.b2i(m[10:13]), m[:10], ecc.b2i(m[13:14])
+        t, q, g = v//10 if y == 0 else 0, ecc.z2, b'_' + ecc.z2 # Default tax value: 10%
         with dbm.open(s.n, 'c') as b:
-            if (x in b and p == ecc.b2i(b[x][3:])) or (x not in b and p == 0): b[x] = y
+            if x not in b and p == 0:
+                print ("ici")
+                b[x] = ecc.i2b(v,    3) + ecc.i2b(t,    3) + ecc.i2b(1  , 2) 
+            elif (x in b and p == ecc.b2i(b[x][6:])):
+                print ("la")
+                ov, ot, op = ecc.b2i(b[x][:3]), ecc.b2i(b[x][3:6]), ecc.b2i(b[x][6:])
+                b[x] = ecc.i2b(v+ov, 3) + ecc.i2b(t+ot, 3) + ecc.i2b(1+op, 2)
+            else: assert True
+            if s.n != 'PUB': b[m[:16]] = m[16:]
+            else: b[q], b[g] = ecc.i2b(len(s.tpk), 6), ecc.i2b(ecc.b2i(b[g]) + t, 6)
 
-    def manage(s, m): # if not PUB, message can be reduced to Src+Val+Sig
+    def manage(s, m):
         t, k = socket.socket(socket.AF_INET, socket.SOCK_DGRAM), ecc.ecdsa()
-        if s.n != 'PUB': assert m[4:8] == s.tid[s.n]
-        k.pt = k.uncompress(m[:4] + s.tpk[m[:4]]) # public key sent at init
-        assert k.verify(m[13:], m[:13])
-        if s.pos(m[:8]) == m[11:13]:
-            assert s.check(m[:4], ecc.b2i(m[8:11]))
-            s.add(m[:13])
-            dst = s.rvs[m[4:8]]
-            if s.n == 'PUB':
-                if dst in s.tbl: t.sendto(m, (HOST, s.tbl[dst]))
-                else: pass # add pending
-        else: assert ecc.b2i(s.pos(m[:8])) == ecc.b2i(m[11:13]) + 1
+        k.pt = k.uncompress(m[:5] + s.tpk[m[:5]])         
+        if s.n != 'PUB' and m[5:10] != s.tid[s.n]:    return False
+        if not k.verify(m[16:], m[:16]):              return False
+        if s.pos(m[:10]) == m[14:16]:
+            if not s.check(m[:5], ecc.b2i(m[10:13])): return False
+            s.add(m)
+            dst = s.rvs[m[5:10]]
+            if s.n == 'PUB' and dst in s.tbl: t.sendto(m, (HOST, s.tbl[dst]))
+            return True
+        else:
+            return ecc.b2i(s.pos(m[:10])) == ecc.b2i(m[14:16]) + 1
 
     def sendpk(s, dst, m):
         t = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -239,30 +260,31 @@ class handler(http.server.BaseHTTPRequestHandler):
         s.end_headers()
 
     def do_POST(s): # online transaction because only PUB has an HTTP server
-        d, k, rt = s.rfile.read(int(s.headers['Content-Length'])), ecc.ecdsa(), {}
-        if len(d) > 48 and len(d) < 63: # register -> pk + name
+        d, rt = s.rfile.read(int(s.headers['Content-Length'])), {}
+        if len(d) > 48 and len(d) < 60: # register -> pk + name
             s.nod.me = d[48:].decode('utf-8')
-            print ('Register', s.nod.me)
-            s.nod.tid[s.nod.me] = d[:4]
-            s.nod.rvs[d[:4]] = s.nod.me
-            s.nod.tpk[d[:4]] = d[4:48]
+            print ('Phone register', s.nod.me)
+            s.nod.tid[s.nod.me] = d[:5]
+            s.nod.rvs[d[:5]] = s.nod.me
+            s.nod.tpk[d[:5]] = d[5:48]
             s.nod.sendpk(s.nod.tid['PUB'], d)
-            #print (s.nod.tid)            
             s.response('application/json')            
             for x in [y for y in s.nod.tbl if y != 'PUB']:
                 nid = s.nod.tid[x]
                 rt[x] = ecc.base64.b64encode(nid + s.nod.tpk[nid]).decode('utf-8')
             s.wfile.write(json.dumps(rt).encode('utf-8'))
-        elif len(d) == RLEN and s.nod.me in s.nod.tid: # pay transaction(13)+signature(96)
-            print ('Pay', len(s.nod.tid[s.nod.me]), len(s.nod.tpk[s.nod.tid[s.nod.me]]))
-            k.pt = k.uncompress(s.nod.tid[s.nod.me] + s.nod.tpk[s.nod.tid[s.nod.me]])
-            assert k.verify(d[13:], d[:13])
-            s.nod.manage(d)
-            s.response('application/octet-stream')
-            s.wfile.write(b'ok')
-        else: # bad request
-            s.response('application/octet-stream')
-            s.wfile.write(b'ko')
+        elif s.manage_post(d): s.wfile.write(b'ok')
+        else:                  s.wfile.write(b'ko') 
+
+    def manage_post(s, d):
+        k = ecc.ecdsa()
+        s.response('application/octet-stream')
+        if len(d) != RLEN:                                          return False
+        if s.nod.me not in s.nod.tid:                               return False 
+        if not s.nod.check(s.nod.tid[s.nod.me], ecc.b2i(d[10:13])): return False
+        k.pt = k.uncompress(s.nod.tid[s.nod.me] + s.nod.tpk[s.nod.tid[s.nod.me]])
+        if not k.verify(d[16:], d[:16]):                            return False
+        return s.nod.manage(d)
         
     def do_GET(s): # does not show the all matrix for Privacy
         t = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
